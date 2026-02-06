@@ -110,6 +110,15 @@ export const PAYMENT_TYPE = {
 
 export type PaymentType = keyof typeof PAYMENT_TYPE
 
+export const PAYMENT_TYPE_NAMES: Record<PaymentType, string> = {
+  INTEREST: 'Trả lãi',
+  PARTIAL: 'Trả một phần gốc',
+  FULL_REDEEM: 'Chuộc toàn bộ',
+  EXTENSION_FEE: 'Phí gia hạn',
+  PENALTY: 'Phí phạt',
+  OTHER: 'Khác',
+}
+
 // Payment Methods
 export const PAYMENT_METHOD = {
   CASH: 'CASH',

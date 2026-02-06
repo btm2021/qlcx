@@ -1,9 +1,53 @@
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { LoginForm } from '@/components/biz/auth/login-form'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
+  const router = useRouter()
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const supabase = createClient()
+
+  const handleLogin = async (email: string, password: string) => {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (signInError) {
+        setError(signInError.message === 'Invalid login credentials'
+          ? 'Email hoặc mật khẩu không đúng'
+          : signInError.message
+        )
+        return
+      }
+
+      // Update last_login_at in staff table
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase
+          .from('staff')
+          .update({ last_login_at: new Date().toISOString() })
+          .eq('auth_user_id', user.id)
+      }
+
+      router.push('/')
+      router.refresh()
+    } catch {
+      setError('Đã xảy ra lỗi. Vui lòng thử lại.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <Card>
       <CardHeader className="text-center">
@@ -13,19 +57,11 @@ export default function LoginPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="nv@example.com" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Mật khẩu</Label>
-            <Input id="password" type="password" />
-          </div>
-          <Button type="submit" className="w-full">
-            Đăng nhập
-          </Button>
-        </form>
+        <LoginForm
+          onSubmit={handleLogin}
+          isLoading={isLoading}
+          error={error}
+        />
       </CardContent>
     </Card>
   )

@@ -201,3 +201,13 @@ export interface CreateInspectionInput {
   gps_accuracy?: number
   missing_note?: string
 }
+
+export interface ContractStatusHistory {
+  id: string
+  contract_id: string
+  old_status?: 'DRAFT' | 'ACTIVE' | 'EXTENDED' | 'OVERDUE' | 'REDEEMED' | 'LIQUIDATING' | 'LIQUIDATED' | 'CANCELLED'
+  new_status: 'DRAFT' | 'ACTIVE' | 'EXTENDED' | 'OVERDUE' | 'REDEEMED' | 'LIQUIDATING' | 'LIQUIDATED' | 'CANCELLED'
+  changed_by: string
+  changed_at: string
+  reason?: string
+}
